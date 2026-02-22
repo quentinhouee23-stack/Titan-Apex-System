@@ -1,0 +1,92 @@
+import Foundation
+import Vision
+import VisionKit
+import SwiftUI
+import UIKit
+
+// GESTIONNAIRE DE VISION "TITAN APEX" - VERSION NETTOYÉE
+
+class VisionManager: ObservableObject {
+@Published var texteDetecte: String = ""
+@Published var dateDetectee: Date?
+@Published var estEnTrainDAnalyser: Bool = false
+
+// --- MOTEUR D'ANALYSE IA ---
+func traiterImageScanne(uiImage: UIImage) {
+self.estEnTrainDAnalyser = true
+
+guard let cgImage = uiImage.cgImage else {
+self.estEnTrainDAnalyser = false
+return
+}
+
+let request = VNRecognizeTextRequest { (request, error) in
+guard let observations = request.results as? [VNRecognizedTextObservation] else { return }
+
+let chainesExtractes = observations.compactMap { $0.topCandidates(1).first?.string }
+
+DispatchQueue.main.async {
+self.texteDetecte = chainesExtractes.joined(separator: "\n")
+self.chercherDateExpiration(dans: chainesExtractes)
+self.estEnTrainDAnalyser = false
+}
+}
+
+request.recognitionLevel = .accurate
+let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
+
+DispatchQueue.global(qos: .userInitiated).async {
+try? handler.perform([request])
+}
+}
+
+private func chercherDateExpiration(dans lignes: [String]) {
+let regexPattern = #"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b"#
+let formateur = DateFormatter()
+let formats = ["dd/MM/yy", "dd/MM/yyyy", "dd-MM-yy", "dd-MM-yyyy"]
+
+for ligne in lignes {
+if let range = ligne.range(of: regexPattern, options: .regularExpression) {
+let dateTrouvee = String(ligne[range])
+for format in formats {
+formateur.dateFormat = format
+if let date = formateur.date(from: dateTrouvee) {
+self.dateDetectee = date
+return
+}
+}
+}
+}
+}
+}
+
+// --- INTERFACE CAMÉRA ---
+struct ScannerModule: UIViewControllerRepresentable {
+@Binding var textResult: String
+@Environment(\.presentationMode) var presentationMode
+
+func makeUIViewController(context: Context) -> VNDocumentCameraViewController {
+let vc = VNDocumentCameraViewController()
+vc.delegate = context.coordinator
+return vc
+}
+
+func updateUIViewController(_ uiViewController: VNDocumentCameraViewController, context: Context) {}
+
+
+func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+class Coordinator: NSObject, VNDocumentCameraViewControllerDelegate {
+var parent: ScannerModule
+init(_ parent: ScannerModule) { self.parent = parent }
+
+func documentCameraViewController(_ controller: VNDocumentCameraViewController, didFinishWith scan: VNDocumentCameraScan) {
+// Ici, on récupère juste le texte pour l'instant
+parent.presentationMode.wrappedValue.dismiss()
+}
+
+func documentCameraViewControllerDidCancel(_ controller: VNDocumentCameraViewController) {
+parent.presentationMode.wrappedValue.dismiss()
+}
+}
+}
