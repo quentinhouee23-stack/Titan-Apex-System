@@ -1,0 +1,25 @@
+import Foundation
+
+class PersistenceManager {
+// Chemin vers le dossier de stockage de l'iPad
+static let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+static let archiveURL = documentsDirectory.appendingPathComponent("titan_reserve").appendingPathExtension("plist")
+
+// Fonction pour SAUVEGARDER
+static func saveAliments(_ aliments: [Aliment]) {
+let propertyListEncoder = PropertyListEncoder()
+if let encodedAliments = try? propertyListEncoder.encode(aliments) {
+try? encodedAliments.write(to: archiveURL, options: .noFileProtection)
+}
+}
+
+// Fonction pour CHARGER au démarrage
+static func loadAliments() -> [Aliment]? {
+let propertyListDecoder = PropertyListDecoder()
+if let retrievedAlimentData = try? Data(contentsOf: archiveURL),
+let decodedAliments = try? propertyListDecoder.decode([Aliment].self, from: retrievedAlimentData) {
+return decodedAliments
+}
+return nil
+}
+}
