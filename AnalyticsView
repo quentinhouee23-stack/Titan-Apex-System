@@ -1,0 +1,33 @@
+import SwiftUI
+import Charts
+
+struct AnalyticsView: View {
+var reserve: [Aliment]
+
+var body: some View {
+NavigationView {
+List {
+Section(header: Text("Analyse des Stocks")) {
+Chart(reserve) { item in
+BarMark(
+x: .value("Nom", item.nom),
+y: .value("Jours", item.joursRestants)
+)
+.foregroundStyle(item.estUrgent ? Color.red : Color.blue)
+}
+.frame(height: 250)
+.padding(.vertical)
+}
+
+Section(header: Text("Résumé")) {
+HStack {
+Text("Total produits")
+Spacer()
+Text("\(reserve.count)").bold()
+}
+}
+}
+.navigationTitle("Statistiques")
+}
+}
+}
