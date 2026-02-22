@@ -1,0 +1,39 @@
+import Foundation
+import UserNotifications
+
+class NotificationManager: ObservableObject {
+@Published var autorisationAccordee = false
+
+// Demande la permission d'envoyer des alertes à l'utilisateur
+func demanderPermission() {
+UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { succes, erreur in
+DispatchQueue.main.async {
+self.autorisationAccordee = succes
+}
+}
+}
+
+// Programme une alerte pour un produit spécifique
+func programmerNotification(pour aliment: Aliment) {
+let contenu = UNMutableNotificationContent()
+contenu.title = "Alerte Péremption : \(aliment.nom)"
+contenu.body = "Ton produit \(aliment.nom) va périmer dans 48 heures. Pense à le cuisiner !"
+contenu.sound = .default
+
+// On calcule la date de l'alerte (2 jours avant la péremption)
+let calendrier = Calendar.current
+if let dateAlerte = calendrier.date(byAdding: .day, value: -2, to: aliment.datePeremption) {
+let composants = calendrier.dateComponents([.year, .month, .day, .hour, .minute], from: dateAlerte)
+
+let declencheur = UNCalendarNotificationTrigger(dateMatching: composants, repeats: false)
+let requete = UNNotificationRequest(identifier: aliment.id.uuidString, content: contenu, trigger: declencheur)
+
+UNUserNotificationCenter.current().add(requete)
+}
+}
+
+// Annule une notification (si le produit est consommé)
+func annulerNotification(pour id: UUID) {
+UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [id.uuidString])
+}
+}
