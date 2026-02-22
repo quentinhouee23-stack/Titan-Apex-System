@@ -1,0 +1,67 @@
+import SwiftUI
+
+struct SettingsView: View {
+@AppStorage("username") var username: String = "Mathis"
+@AppStorage("isDarkMode") var isDarkMode: Bool = false
+@AppStorage("notificationDays") var notificationDays: Int = 3
+@State private var showingSecurityAlert = false
+
+var body: some View {
+NavigationView {
+Form {
+// SECTION 1 : PROFIL UTILISATEUR
+Section(header: Text("Profil Titan")) {
+HStack {
+Image(systemName: "person.crop.circle.fill")
+.font(.system(size: 50))
+.foregroundColor(.blue)
+VStack(alignment: .leading) {
+TextField("Nom d'utilisateur", text: $username)
+.font(.headline)
+Text("Rang : Chef Suprême").font(.caption).foregroundColor(.secondary)
+}
+}
+.padding(.vertical, 10)
+}
+
+// SECTION 2 : PRÉFÉRENCES D'ALERTES
+Section(header: Text("Configuration des Alertes"), footer: Text("L'app t'enverra un rappel \(notificationDays) jours avant la date limite.")) {
+Stepper("Prévenir avant : \(notificationDays) jours", value: $notificationDays, in: 1...7)
+Toggle("Notifications Push", isOn: .constant(true))
+Toggle("Mode Sombre", isOn: $isDarkMode)
+}
+
+// SECTION 3 : SÉCURITÉ ET DONNÉES
+Section(header: Text("Sécurité")) {
+Button(action: { showingSecurityAlert = true }) {
+Label("Vider la Réserve", systemImage: "trash")
+.foregroundColor(.red)
+}
+}
+
+// SECTION 4 : INFOS SYSTÈME (Grosse section pour le volume de code)
+Section(header: Text("À propos")) {
+HStack {
+Text("Version")
+Spacer()
+Text("1.0.0 (Absolute Apex)").foregroundColor(.secondary)
+}
+HStack {
+Text("Moteur IA")
+Spacer()
+Text("Titan Vision v2.1").foregroundColor(.secondary)
+}
+}
+}
+.navigationTitle("Réglages")
+.alert("Attention", isPresented: $showingSecurityAlert) {
+Button("Annuler", role: .cancel) { }
+Button("Tout supprimer", role: .destructive) {
+// Logique pour vider la liste
+}
+} message: {
+Text("Es-tu sûr de vouloir supprimer tous tes produits ? Cette action est irréversible.")
+}
+}
+}
+}
