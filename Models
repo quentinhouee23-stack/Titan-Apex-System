@@ -1,0 +1,35 @@
+import Foundation
+import SwiftUI
+
+// Ajout des imports indispensables pour corriger les erreurs rouges
+enum FoodCategory: String, CaseIterable, Codable {
+case fruits, legumes, viandes, laitages, surgeles, boissons, epicerie, divers
+}
+
+struct Aliment: Identifiable, Codable, Equatable {
+var id = UUID()
+var nom: String
+var quantite: Int
+var datePeremption: Date
+var categorie: FoodCategory
+var calories: Int
+var prix: Double
+var poids: Double
+var estOuvert: Bool
+var addedDate: Date
+var notePersonnelle: String
+
+// Correction du bug d'animation (Equatable)
+static func == (lhs: Aliment, rhs: Aliment) -> Bool {
+return lhs.id == rhs.id && lhs.quantite == rhs.quantite && lhs.nom == rhs.nom
+}
+
+var joursRestants: Int {
+let calendar = Calendar.current
+let d1 = calendar.startOfDay(for: Date())
+let d2 = calendar.startOfDay(for: datePeremption)
+return calendar.dateComponents([.day], from: d1, to: d2).day ?? 0
+}
+
+var estUrgent: Bool { joursRestants <= 3 }
+}
