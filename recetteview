@@ -1,0 +1,44 @@
+import SwiftUI
+
+struct RecettesView: View {
+let colonnes = [GridItem(.flexible()), GridItem(.flexible())]
+
+var body: some View {
+NavigationView {
+ScrollView {
+VStack(alignment: .leading) {
+Text("MENU TITAN").font(.caption).bold().padding(.leading)
+
+LazyVGrid(columns: colonnes, spacing: 20) {
+// On génère 50 cartes de recettes pour le record
+ForEach(1...50, id: \.self) { index in
+NavigationLink(destination: Text("Détails de la recette \(index)")) {
+VStack {
+Image(systemName: "fork.knife.circle.fill")
+.font(.system(size: 40))
+.foregroundStyle(TitanDesign.primaryGradient)
+
+Text("Plat Apex #\(index)")
+.font(.headline)
+.foregroundColor(.primary)
+
+Text("Prêt en \(index + 10) min")
+.font(.caption)
+.foregroundColor(.secondary)
+}
+.frame(maxWidth: .infinity)
+.padding()
+.background(Color.white)
+.cornerRadius(20)
+.shadow(color: .black.opacity(0.05), radius: 10)
+}
+}
+}
+.padding()
+}
+}
+.navigationTitle("Cuisine Pro")
+.background(Color(uiColor: .systemGroupedBackground))
+}
+}
+}
