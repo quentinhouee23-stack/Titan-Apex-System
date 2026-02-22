@@ -1,0 +1,54 @@
+import SwiftUI
+
+struct ContentView: View {
+// --- ÉTAT GLOBAL DE L'APPLICATION ---
+// Ces variables sont partagées entre tous les onglets
+@State private var selection = 0
+@State private var maReserve: [Aliment] = []
+
+var body: some View {
+TabView(selection: $selection) {
+
+// --- ONGLET 1 : LA RÉSERVE (Scanner + Liste) ---
+GestionnaireView(reserve: $maReserve)
+.tabItem {
+Label("Réserve", systemImage: "archivebox.fill")
+}
+.tag(0)
+
+// --- ONGLET 2 : ANALYTICS (Graphiques de consommation) ---
+AnalyticsView(reserve: maReserve)
+.tabItem {
+Label("Stats", systemImage: "chart.bar.fill")
+}
+.tag(1)
+
+// --- ONGLET 3 : RECETTES (Idées du Chef Mathis) ---
+RecettesView()
+.tabItem {
+Label("Recettes", systemImage: "chefhat.fill")
+}
+.tag(2)
+
+// --- ONGLET 4 : PROFIL (Réglages et Personnalisation) ---
+SettingsView()
+.tabItem {
+Label("Profil", systemImage: "person.gearshape.fill")
+}
+.tag(3)
+}
+.accentColor(.blue) // Couleur principale de l'interface
+.onAppear {
+// Charger les données sauvegardées au démarrage de l'app
+if let savedItems = PersistenceManager.loadAliments() {
+self.maReserve = savedItems
+}
+}
+}
+}
+// AJOUTE CECI TOUT EN BAS DE CONTENTVIEW.SWIFT
+struct ContentView_Previews: PreviewProvider {
+static var previews: some View {
+ContentView()
+}
+}
