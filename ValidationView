@@ -1,0 +1,59 @@
+import SwiftUI
+
+struct ValidationView: View {
+@Binding var nom: String
+@Binding var date: Date
+@Binding var quantite: Int
+var onValider: () -> Void
+var onAnnuler: () -> Void
+
+var body: some View {
+VStack(spacing: 25) {
+// Indicateur visuel de scan réussi
+Capsule()
+.frame(width: 40, height: 6)
+.foregroundColor(.gray.opacity(0.3))
+.padding(.top)
+
+Text("Vérification Titan").font(.headline).foregroundColor(.blue)
+
+VStack(alignment: .leading, spacing: 15) {
+// Modification du nom
+Label("Nom du produit", systemImage: "tag")
+.font(.caption).bold().foregroundColor(.secondary)
+TextField("Nom", text: $nom)
+.textFieldStyle(RoundedBorderTextFieldStyle())
+.font(.title3)
+
+// Modification de la date
+Label("Date de péremption", systemImage: "calendar")
+.font(.caption).bold().foregroundColor(.secondary)
+DatePicker("Sélectionner", selection: $date, displayedComponents: .date)
+.labelsHidden()
+
+// Gestion de la quantité
+Label("Quantité", systemImage: "cart")
+.font(.caption).bold().foregroundColor(.secondary)
+Stepper("Nombre : \(quantite)", value: $quantite, in: 1...99)
+}
+.padding()
+.background(Color.blue.opacity(0.05))
+.cornerRadius(20)
+
+// Boutons d'action
+HStack(spacing: 20) {
+Button(action: onAnnuler) {
+Text("Annuler").bold().frame(maxWidth: .infinity).padding().background(Color.gray.opacity(0.2)).cornerRadius(15)
+}
+
+Button(action: onValider) {
+Text("Ajouter à la Réserve").bold().foregroundColor(.white).frame(maxWidth: .infinity).padding().background(Color.blue).cornerRadius(15)
+}
+}
+.padding(.top)
+
+Spacer()
+}
+.padding()
+}
+}
