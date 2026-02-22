@@ -1,0 +1,45 @@
+import SwiftUI
+
+struct GestionnaireView: View {
+@Binding var reserve: [Aliment]
+@State private var searchText = ""
+
+var body: some View {
+NavigationView {
+ZStack {
+Color(uiColor: .systemGroupedBackground).ignoresSafeArea()
+
+VStack {
+Text("MON STOCK").font(.system(size: 24, weight: .black)).padding()
+
+ScrollView {
+VStack(spacing: 12) {
+ForEach(reserve.filter { searchText.isEmpty ? true : $0.nom.localizedCaseInsensitiveContains(searchText) }) { item in
+CustomRow(item: item)
+.transition(.move(edge: .trailing).combined(with: .opacity))
+}
+}
+.padding()
+}
+.animation(.spring(), value: reserve)
+}
+}
+.navigationBarHidden(true)
+}
+}
+}
+
+struct CustomRow: View {
+let item: Aliment
+var body: some View {
+HStack {
+VStack(alignment: .leading) {
+Text(item.nom).font(.headline)
+Text("Périme dans \(item.joursRestants) jours").font(.caption).foregroundColor(.secondary)
+}
+Spacer()
+Text("x\(item.quantite)").bold().padding(8).background(Color.blue.opacity(0.1)).cornerRadius(8)
+}
+
+}
+}
