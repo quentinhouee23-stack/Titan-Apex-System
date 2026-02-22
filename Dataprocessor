@@ -1,0 +1,41 @@
+import Foundation
+
+class DataProcessor: ObservableObject {
+
+// Fonction maîtresse qui transforme le texte en objet Aliment
+func traiterTexteBrut(_ texte: String) -> (nom: String, date: Date) {
+let lignes = texte.components(separatedBy: .newlines)
+var nomDetecte = "Produit Inconnu"
+var dateDetectee = Date().addingTimeInterval(86400 * 7) // Par défaut +7 jours
+
+// --- LOGIQUE DE DÉTECTION DE DATE (REGEX) ---
+let patternDate = #"\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b"#
+
+for ligne in lignes {
+// Si la ligne contient une date, on l'extrait
+if let range = ligne.range(of: patternDate, options: .regularExpression) {
+let dateStr = String(ligne[range])
+dateDetectee = convertirEnDate(dateStr) ?? dateDetectee
+} else if ligne.count > 3 && nomDetecte == "Produit Inconnu" {
+// Sinon, la première ligne longue est probablement le nom
+nomDetecte = ligne.capitalized
+}
+}
+
+return (nomDetecte, dateDetectee)
+}
+
+// Convertisseur de texte vers format Date
+private func convertirEnDate(_ chaine: String) -> Date? {
+let formateur = DateFormatter()
+let formats = ["dd/MM/yy", "dd/MM/yyyy", "dd-MM-yy", "dd-MM-yyyy"]
+
+for format in formats {
+formateur.dateFormat = format
+if let date = formateur.date(from: chaine) {
+return date
+}
+}
+return nil
+}
+}
